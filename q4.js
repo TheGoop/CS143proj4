@@ -1,4 +1,8 @@
 db.laureates.aggregate(
+    { $unwind: "$nobelPrizes" },
+
+    { $unwind: "$nobelPrizes.affiliations" },
+
     {
         $match:
         {
@@ -9,20 +13,27 @@ db.laureates.aggregate(
         $project:
         {
             "_id": 0,
-            "name": "nobelPrizes.affiliations.name.en",
+            "id": 1,
+            "name": "$nobelPrizes.affiliations.name.en",
             "country": "$nobelPrizes.affiliations.country.en",
             "city": "$nobelPrizes.affiliations.city.en"
         }
     },
-    // { $unwind: "$country" },
-    // { $unwind: "$country" },
-    // { $unwind: "$city" },
-    // { $unwind: "$city" },
-    // {
-    //     $group:
-    //     {
-    //         _id: { city: '$city', country: '$country' },
-    //         totaldocs: { $sum: 1 }
-    //     }
-    // }
+    {
+        $group:
+        {
+            _id: { city: '$city', country: '$country' },
+            totaldocs: { $sum: 1 }
+        }
+    },
+    {
+        $count: "locations"
+    },
+    {
+        $project:
+        {
+            "_id": 0,
+        }
+    }
+
 )
